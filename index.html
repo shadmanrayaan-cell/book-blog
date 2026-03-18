@@ -947,6 +947,12 @@
 
 <!-- TOPBAR -->
 <header class="topbar">
+  <div class="top-actions">
+    <button class="btn-outline" data-tip="Admin Login" onclick="openModal('adminLoginModal')">🔒</button>
+    
+    <button class="btn-outline" data-tip="Write Review" onclick="openModal('addReviewModal')">✍</button>
+    <button class="btn-primary" data-tip="Add Book" onclick="openModal('addBookModal')">+</button>
+</div>
   <div class="logo">LIT<span>VERSE</span></div>
   <nav class="topnav">
     <button class="active" onclick="showPage('home', this)">Home</button>
@@ -1124,7 +1130,25 @@
 </div>
 
 <!-- ── MODALS ── -->
-
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Admin Access</h2>
+      <button class="modal-close" onclick="closeModal('adminLoginModal')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="adminEmail" placeholder="your-email@example.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPassword" placeholder="••••••••">
+    </div>
+    <div class="submit-row">
+      <button class="btn-submit" onclick="handleAdminLogin()">Login as Admin</button>
+    </div>
+  </div>
+</div>
 <!-- Add Review Modal -->
 <div class="modal-overlay" id="addReviewModal">
   <div class="modal">
@@ -1294,6 +1318,34 @@
 <div id="toast"><span class="toast-icon" id="toastIcon">✓</span><span id="toastMsg">Saved!</span></div>
 
 <script>
+  let currentAdmin = null;
+const ADMIN_ID = 'e2589c1f-56a2-4897-bfdd-d71fa3cc9de0'; // Get this from Supabase Auth -> Users
+
+async function handleAdminLogin() {
+    const email = document.getElementById('adminEmail').value;
+    const password = document.getElementById('adminPassword').value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        alert("Login failed: " + error.message);
+    } else {
+        currentAdmin = data.user;
+        alert("Welcome back, Admin!");
+        closeModal('adminLoginModal');
+        refreshUI(); // Re-render the page to show buttons
+    }
+}
+
+// Check session on page load
+async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        currentAdmin = session.user;
+        refreshUI();
+    }
+}
+checkUser();
 const SUPABASE_URL  = 'https://fggquycnzgfhihiplesm.supabase.co';   // e.g. https://abcxyz.supabase.co
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZ3F1eWNuemdmaGloaXBsZXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODQ3MzAsImV4cCI6MjA4OTI2MDczMH0.FnCayaL4vM_nEddT9IG8B0KhSNI2f8PYxcdXRBhS8VA';
 
